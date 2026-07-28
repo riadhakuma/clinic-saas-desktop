@@ -1,0 +1,24 @@
+# PyInstaller Build Artifacts
+build/
+dist/
+*.spec
+
+# SQLite Database & Local App Logs
+clinic_data.db
+app_error.log
+*.db
+*.log
+
+# Python Cache & Environment
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.env
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
