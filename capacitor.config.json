@@ -1,0 +1,6 @@
+{
+  "appId": "com.clinique.saas",
+  "appName": "Clinique SaaS",
+  "webDir": "app/static",
+  "bundledWebRuntime": false
+}
