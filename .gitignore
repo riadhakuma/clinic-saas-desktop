@@ -5,7 +5,6 @@ dist/
 
 # Node Modules & Capacitor Temp Builds
 node_modules/
-package-lock.json
 
 # SQLite Database & Local App Logs
 clinic_data.db

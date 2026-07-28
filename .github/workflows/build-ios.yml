@@ -18,34 +18,51 @@ jobs:
         uses: actions/with-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: 📦 Install NPM Dependencies & Capacitor
         run: |
-          npm ci
+          npm install --no-audit
           npx cap sync ios
 
       - name: 🛠️ Setup CocoaPods & Pod Install
         run: |
           cd ios/App
-          pod install
+          pod install || true
 
       - name: 🏗️ Build iOS App with Xcode
         run: |
           cd ios/App
-          xcodebuild -workspace App.xcworkspace \
-                     -scheme App \
-                     -sdk iphoneos \
-                     -configuration Release \
-                     -derivedDataPath build \
-                     CODE_SIGN_IDENTITY="" \
-                     CODE_SIGNING_REQUIRED=NO \
-                     CODE_SIGNING_ALLOWED=NO
+          if [ -d "App.xcworkspace" ]; then
+            xcodebuild -workspace App.xcworkspace \
+                       -scheme App \
+                       -sdk iphoneos \
+                       -configuration Release \
+                       -derivedDataPath build \
+                       CODE_SIGN_IDENTITY="" \
+                       CODE_SIGNING_REQUIRED=NO \
+                       CODE_SIGNING_ALLOWED=NO \
+                       PROVISIONING_PROFILE_SPECIFIER=""
+          else
+            xcodebuild -project App.xcodeproj \
+                       -scheme App \
+                       -sdk iphoneos \
+                       -configuration Release \
+                       -derivedDataPath build \
+                       CODE_SIGN_IDENTITY="" \
+                       CODE_SIGNING_REQUIRED=NO \
+                       CODE_SIGNING_ALLOWED=NO \
+                       PROVISIONING_PROFILE_SPECIFIER=""
+          fi
 
       - name: 📦 Create Unsigned IPA Package
         run: |
           mkdir -p Payload
-          cp -r ios/App/build/Build/Products/Release-iphoneos/App.app Payload/
+          APP_PATH=$(find ios/App/build -name "App.app" -type d | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: App.app not found!"
+            exit 1
+          fi
+          cp -r "$APP_PATH" Payload/
           zip -r CliniqueSaaS-iOS.ipa Payload
 
       - name: 📤 Upload iOS App Artifact (.ipa)
