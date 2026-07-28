@@ -36,22 +36,26 @@ jobs:
             xcodebuild -workspace App.xcworkspace \
                        -scheme App \
                        -sdk iphoneos \
+                       -destination 'generic/platform=iOS' \
                        -configuration Release \
                        -derivedDataPath build \
                        CODE_SIGN_IDENTITY="" \
                        CODE_SIGNING_REQUIRED=NO \
                        CODE_SIGNING_ALLOWED=NO \
-                       PROVISIONING_PROFILE_SPECIFIER=""
+                       AD_HOC_CODE_SIGNING_ALLOWED=YES \
+                       COMPILER_INDEX_STORE_ENABLE=NO
           else
             xcodebuild -project App.xcodeproj \
                        -scheme App \
                        -sdk iphoneos \
+                       -destination 'generic/platform=iOS' \
                        -configuration Release \
                        -derivedDataPath build \
                        CODE_SIGN_IDENTITY="" \
                        CODE_SIGNING_REQUIRED=NO \
                        CODE_SIGNING_ALLOWED=NO \
-                       PROVISIONING_PROFILE_SPECIFIER=""
+                       AD_HOC_CODE_SIGNING_ALLOWED=YES \
+                       COMPILER_INDEX_STORE_ENABLE=NO
           fi
 
       - name: 📦 Create Unsigned IPA Package
@@ -62,6 +66,7 @@ jobs:
             echo "Error: App.app not found!"
             exit 1
           fi
+          echo "Found app at $APP_PATH"
           cp -r "$APP_PATH" Payload/
           zip -r CliniqueSaaS-iOS.ipa Payload
 
