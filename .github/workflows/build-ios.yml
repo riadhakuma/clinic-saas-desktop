@@ -1,0 +1,56 @@
+name: 📱 Build iOS App (Without Mac)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: 🍏 Compile Native iOS Package (.ipa)
+    runs-on: macos-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/with-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install NPM Dependencies & Capacitor
+        run: |
+          npm ci
+          npx cap sync ios
+
+      - name: 🛠️ Setup CocoaPods & Pod Install
+        run: |
+          cd ios/App
+          pod install
+
+      - name: 🏗️ Build iOS App with Xcode
+        run: |
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace \
+                     -scheme App \
+                     -sdk iphoneos \
+                     -configuration Release \
+                     -derivedDataPath build \
+                     CODE_SIGN_IDENTITY="" \
+                     CODE_SIGNING_REQUIRED=NO \
+                     CODE_SIGNING_ALLOWED=NO
+
+      - name: 📦 Create Unsigned IPA Package
+        run: |
+          mkdir -p Payload
+          cp -r ios/App/build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -r CliniqueSaaS-iOS.ipa Payload
+
+      - name: 📤 Upload iOS App Artifact (.ipa)
+        uses: actions/upload-artifact@v4
+        with:
+          name: CliniqueSaaS-iOS-Unsigned
+          path: CliniqueSaaS-iOS.ipa
+          retention-days: 14
